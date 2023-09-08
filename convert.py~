@@ -1,0 +1,4 @@
+import glob, os
+
+for x in glob.glob("slides/*.pdf"):
+    os.system("pdftoppm {x} slides/{x} -png")
