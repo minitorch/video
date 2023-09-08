@@ -73,6 +73,6 @@ for i in range(5):
     images.append(clip)
 video = concatenate_videoclips(images, method="compose")
 video.audio = concatenate_audioclips(sound)
-concat_clip.write_videofile("module0.1.mp4", fps=fps)
+video.write_videofile("module0.1.mp4", fps=fps)
 
 
