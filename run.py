@@ -16,6 +16,11 @@ def reset(val, x):
 
 def record():
     pa.record1st_choice()
+
+def reset_to_last():
+    pa.stop()
+    pa.do('MoveToPrevLabel')
+    pa.do('PunchAndRoll')
     
 def showPhoto(photo, skip):
     st.write(f"Index as a session_state attribute: {st.session_state.counter}")
@@ -48,10 +53,11 @@ st.button("Reset", on_click=reset, args=[out, x])
 photo = ls[st.session_state.counter]
 st.image(photo,caption=photo)
 
-c1, c2, c3 = st.columns(3)
+c1, c2, c3, c4 = st.columns(4)
 show_btn = c1.button("Next", on_click=showPhoto,args=([photo, False]))
-show_btn = c2.button("skip", on_click=showPhoto,args=([photo, True]))
-show_btn = c3.button("record", on_click=record)
+show_btn = c2.button("Skip", on_click=showPhoto,args=([photo, True]))
+show_btn = c3.button("Record", on_click=record)
+show_btn = c4.button("Again", on_click=reset_to_last)
 
 photo_next = ls[st.session_state.counter + 1]
 st.image(photo_next, caption=photo_next, width=200)
