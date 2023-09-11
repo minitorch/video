@@ -1,6 +1,8 @@
 import math
 import moviepy
 from moviepy.editor import *
+import sys
+
 
 # Iterate over audio to find the non-silent parts. Outputs a list of
 # (speaking_start, speaking_end) intervals.
@@ -30,7 +32,7 @@ def find_speaking(audio_clip, window_size=0.1, volume_threshold=0.01, ease_in=0.
         # speaking -> silence, now have a speaking interval
         if not e1 and e2:
             speaking_end = i * window_size
-            new_speaking_interval = [speaking_start - ease_in, speaking_end + ease_in]
+            new_speaking_interval = [max(0, speaking_start - ease_in), speaking_end + ease_in]
             # With tiny windows, this can sometimes overlap the previous window, so merge.
             need_to_merge = len(speaking_intervals) > 0 and speaking_intervals[-1][1] > new_speaking_interval[0]
             if need_to_merge:
@@ -42,37 +44,50 @@ def find_speaking(audio_clip, window_size=0.1, volume_threshold=0.01, ease_in=0.
     return speaking_intervals
 
 
+def main():
+    module = sys.argv[1]
+    submodule = sys.argv[2]
+    aclip = AudioFileClip(f"audio/module{module}.{submodule}.wav")
+    d = []
+    for l in open(f"audio/module{module}.{submodule}.txt"):
+        time, _, name = l.split()
+        d.append((float(time), name))
 
-d = {}
-for l in open("audio/module0.1.txt"):
-    time, _, name = l.split()
-    d[name] = float(time)
+    d.sort()
+    slides = []
+    last = 0.0
+    for t, n in d:
+        if t > aclip.duration:
+            print("drop", t, n)
+            continue
+        slides.append((n, last, t))
+        last = t
+        
+    images = []
+    sound = []
+    for i in range(len(slides)):
+        x = slides[i]
+        clip2 = aclip.subclip(x[1], x[2])
+        intervals_to_keep = find_speaking(clip2)
+        keep_clips = [clip2.subclip(start, end) for [start, end] in intervals_to_keep]
+        assert(len(keep_clips) > 0)
+        clip2 = concatenate_audioclips(keep_clips)
+        sound.append(clip2)
+        assert clip2.duration > 0, str(intervals_to_keep)
+        print(x[0], clip2.duration)
+        clip = ImageClip(x[0]).set_duration(clip2.duration)
+        images.append(clip)
 
 
-slides = []
-last = 0.0
-for n, t in d.items():
-    slides.append((n, last, t))
-    last = t
+    video = concatenate_videoclips(images, method="compose")
+    print(video.duration)
+    audio = concatenate_audioclips(sound)
+    print(audio.duration)
+    video.audio = audio
+    video.write_videofile(f"module{module}.{submodule}.mp4", fps=24)
+
+if __name__ == "__main__":
+    main()
     
-
-
-images = []
-sound = []
-for i in range(5):
-    x = slides[i]
-    clip2 = AudioFileClip("audio/module0.1.wav")
-    #print(d)
-    clip2 = clip2.subclip(x[1], x[2])
-    intervals_to_keep = find_speaking(clip2)
-    #print("Keeping intervals: " + str(intervals_to_keep))
-    keep_clips = [clip2.subclip(start, end) for [start, end] in intervals_to_keep]
-    clip2 = concatenate_audioclips(keep_clips)
-    sound.append(clip2)
-    clip = ImageClip(x[0]).set_duration(clip2.duration)
-    images.append(clip)
-video = concatenate_videoclips(images, method="compose")
-video.audio = concatenate_audioclips(sound)
-video.write_videofile("module0.1.mp4", fps=24)
-
+    #os.system(f'youtube-upload --title="MiniTorch Module {name} ({module}.{submodule})" --description="Lecture on MiniTorch {name}"  --playlist="MiniTorch" --privacy private module{module}.{submodule}.mp4')
 

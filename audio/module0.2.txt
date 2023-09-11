@@ -1,5 +1,5 @@
 9.141146	9.141146	slides/module0.2.slides.pdf-02.png
-19.186869	19.186869	slides/module0.2.slides.pdf-16.png
+19.186869	19.186869	slides/module0.2.slides.pdf-18.png
 67.759823	67.759823	slides/module0.2.slides.pdf-22.png
 96.915523	96.915523	slides/module0.2.slides.pdf-24.png
 139.865100	139.865100	slides/module0.2.slides.pdf-26.png
