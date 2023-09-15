@@ -36,7 +36,7 @@ def showPhoto(photo, skip):
     st.session_state.counter += 1
 
         
-ls = list([j for i,j in enumerate(sorted(list(glob.glob(f"slides/module{sys.argv[1]}.{sys.argv[2]}*.png"))))
+ls = list([j for i,j in enumerate(sorted(list(glob.glob(f"slides/{sys.argv[1]}*.png"))))
            if int(j.split("-")[1].split(".")[0]) % 2 == 0])
 
 # Get list of images in folder
@@ -62,5 +62,3 @@ show_btn = c4.button("Again", on_click=reset_to_last)
 photo_next = ls[st.session_state.counter + 1]
 st.image(photo_next, caption=photo_next, width=200)
 
-#for f in ls: 
-#    st.image(f)
